@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command Center</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0a; color: #e0e0e0;
+    padding: 2rem; max-width: 1200px; margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
+  .meta { color: #555; font-size: 0.8rem; margin-bottom: 2rem; }
+  .meta a { color: #555; text-decoration: none; }
+  .meta a:hover { color: #888; }
+
+  .section-label {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #444; margin: 2rem 0 0.8rem;
+  }
+
+  /* Quick links */
+  .links { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .links a {
+    color: #5dade2; text-decoration: none; font-size: 0.85rem;
+    padding: 0.3rem 0.6rem; border: 1px solid #1a1a1a; border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .links a:hover { border-color: #5dade2; background: rgba(93,173,226,0.05); }
+
+  /* Filters */
+  .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filters button {
+    background: #111; color: #888; border: 1px solid #222;
+    padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer;
+    font-size: 0.75rem; transition: all 0.2s;
+  }
+  .filters button:hover { border-color: #444; color: #ccc; }
+  .filters button.active { background: #5dade2; color: #000; border-color: #5dade2; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th {
+    text-align: left; padding: 0.5rem 0.6rem; border-bottom: 2px solid #1a1a1a;
+    color: #555; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  td { padding: 0.5rem 0.6rem; border-bottom: 1px solid #111; vertical-align: top; }
+  tr:hover { background: #0f0f0f; }
+  tr.parked { opacity: 0.4; }
+
+  a { color: #5dade2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .type-badge {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem; border-radius: 3px; text-transform: uppercase;
+    display: inline-block;
+  }
+  .type-agent { background: #1a1a2e; color: #7b68ee; }
+  .type-skill { background: #1a2e1a; color: #68ee7b; }
+  .type-site { background: #2e1a1a; color: #ee7b68; }
+  .type-template { background: #2e2e1a; color: #eebb68; }
+  .type-redirect { background: #1a1a1a; color: #666; }
+  .type-personal { background: #1a1a1a; color: #666; }
+
+  .readiness {
+    font-weight: 600; font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .r-high { color: #27ae60; }
+  .r-mid { color: #f39c12; }
+  .r-low { color: #555; }
+
+  .pending { color: #888; font-size: 0.8rem; }
+  .notes { color: #555; font-size: 0.8rem; }
+
+  /* Health */
+  .health-item { padding: 0.3rem 0; color: #888; font-size: 0.82rem; }
+  .health-item::before { content: "[ ] "; color: #555; font-family: monospace; }
+
+  /* Summary */
+  .summary { color: #444; font-size: 0.75rem; margin-top: 0.8rem; }
+
+  /* Loading */
+  .loading { color: #333; font-size: 0.85rem; padding: 2rem 0; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    table { font-size: 0.75rem; }
+    .hide-mobile { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Command Center</h1>
+<p class="meta">
+  Auto-refreshes from GitHub ·
+  <a href="https://github.com/chedonline">chedonline</a>
+</p>
+
+<div class="section-label">Quick Links</div>
+<div class="links">
+  <a href="https://chedonline.github.io/agents/ai-news/output/">AI News</a>
+  <a href="https://github.com/chedonline/agents/actions">Actions</a>
+  <a href="https://github.com/chedonline">GitHub</a>
+  <a href="https://console.anthropic.com">Anthropic</a>
+  <a href="https://github.com/chedonline/agents">agents/</a>
+  <a href="https://github.com/chedonline/context">context/</a>
+  <a href="https://github.com/chedonline/skills">skills/</a>
+  <a href="https://github.com/chedonline/projects">projects/</a>
+</div>
+
+<div class="section-label">Projects</div>
+<div class="filters" id="filters"></div>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Readiness</th>
+      <th>Status</th>
+      <th class="hide-mobile">Pending</th>
+      <th class="hide-mobile">Notes</th>
+    </tr>
+  </thead>
+  <tbody id="projects-body">
+    <tr><td colspan="6" class="loading">Loading projects...</td></tr>
+  </tbody>
+</table>
+<div class="summary" id="summary"></div>
+
+<div class="section-label">Health</div>
+<div id="health">
+  <div class="loading">Loading health items...</div>
+</div>
+
+<script>
+const PROJECTS_URL = "https://raw.githubusercontent.com/chedonline/context/main/projects.md";
+const STATE_URL = "https://raw.githubusercontent.com/chedonline/context/main/current-state.md";
+
+let allRows = [];
+let activeFilter = "all";
+
+async function fetchText(url) {
+  const resp = await fetch(url + "?t=" + Date.now());
+  if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
+  return resp.text();
+}
+
+function parseMarkdownTable(md) {
+  const lines = md.split("\n").filter(l => l.trim().startsWith("|"));
+  if (lines.length < 3) return []; // header + separator + at least one row
+  return lines.slice(2).map(line => {
+    const cells = line.split("|").slice(1, -1).map(c => c.trim());
+    return cells;
+  });
+}
+
+function extractLink(cell) {
+  const match = cell.match(/\[([^\]]+)\]\(([^)]+)\)/);
+  return match ? { text: match[1], url: match[2] } : { text: cell, url: null };
+}
+
+function readinessClass(val) {
+  const n = parseInt(val);
+  if (isNaN(n)) return "r-low";
+  if (n >= 75) return "r-high";
+  if (n >= 30) return "r-mid";
+  return "r-low";
+}
+
+function typeClass(type) {
+  return "type-" + type.toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function renderProjects(filter) {
+  const tbody = document.getElementById("projects-body");
+  const rows = filter === "all" ? allRows : allRows.filter(r => r.type.toLowerCase() === filter);
+
+  tbody.innerHTML = rows.map(r => {
+    const parked = r.status.includes("Parked") ? " parked" : "";
+    return `<tr class="${parked}">
+      <td>${r.link.url ? `<a href="${r.link.url}">${r.link.text}</a>` : r.link.text}</td>
+      <td><span class="type-badge ${typeClass(r.type)}">${r.type}</span></td>
+      <td><span class="readiness ${readinessClass(r.readiness)}">${r.readiness}</span></td>
+      <td>${r.status}</td>
+      <td class="pending hide-mobile">${r.pending}</td>
+      <td class="notes hide-mobile">${r.notes}</td>
+    </tr>`;
+  }).join("");
+
+  // Summary
+  const types = {};
+  allRows.forEach(r => {
+    const t = r.type.toLowerCase();
+    types[t] = (types[t] || 0) + 1;
+  });
+  document.getElementById("summary").textContent =
+    Object.entries(types).map(([t, n]) => `${n} ${t}${n > 1 ? "s" : ""}`).join(" · ");
+}
+
+function renderFilters() {
+  const types = [...new Set(allRows.map(r => r.type.toLowerCase()))];
+  const container = document.getElementById("filters");
+  const all = [`<button class="active" onclick="setFilter('all')">All</button>`];
+  types.forEach(t => {
+    all.push(`<button onclick="setFilter('${t}')">${t}</button>`);
+  });
+  container.innerHTML = all.join("");
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll(".filters button").forEach(b => {
+    b.classList.toggle("active", b.textContent.toLowerCase() === f);
+  });
+  renderProjects(f);
+}
+window.setFilter = setFilter;
+
+function parseHealthItems(md) {
+  const items = [];
+  const lines = md.split("\n");
+  for (const line of lines) {
+    const match = line.match(/^- \[ \] \*\*(.+?)\*\*\s*[—–-]\s*(.+)/);
+    if (match) {
+      items.push(`<strong>${match[1]}</strong> — ${match[2]}`);
+    } else {
+      const simple = line.match(/^- \[ \] (.+)/);
+      if (simple) items.push(simple[1]);
+    }
+  }
+  return items;
+}
+
+async function init() {
+  try {
+    const [projectsMd, stateMd] = await Promise.all([
+      fetchText(PROJECTS_URL),
+      fetchText(STATE_URL),
+    ]);
+
+    // Parse projects
+    const rows = parseMarkdownTable(projectsMd);
+    allRows = rows.map(cells => ({
+      link: extractLink(cells[0] || ""),
+      type: cells[1] || "",
+      readiness: cells[2] || "—",
+      status: cells[3] || "",
+      pending: cells[4] || "",
+      notes: cells[5] || "",
+    }));
+
+    renderFilters();
+    renderProjects("all");
+
+    // Parse health
+    const healthItems = parseHealthItems(stateMd);
+    document.getElementById("health").innerHTML = healthItems.length
+      ? healthItems.map(h => `<div class="health-item">${h}</div>`).join("")
+      : '<div class="loading">No open health items.</div>';
+
+  } catch (err) {
+    document.getElementById("projects-body").innerHTML =
+      `<tr><td colspan="6" class="loading">Error: ${err.message}</td></tr>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
