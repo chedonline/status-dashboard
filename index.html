@@ -136,6 +136,23 @@
 </table>
 <div class="summary" id="summary"></div>
 
+<div class="section-label">Usage</div>
+<table id="usage-table">
+  <thead>
+    <tr>
+      <th>Period</th>
+      <th>Tokens</th>
+      <th>Cost</th>
+      <th>Active days</th>
+      <th class="hide-mobile">Top model</th>
+    </tr>
+  </thead>
+  <tbody id="usage-body">
+    <tr><td colspan="5" class="loading">Loading usage...</td></tr>
+  </tbody>
+</table>
+<div class="summary" id="usage-meta"></div>
+
 <div class="section-label">Health</div>
 <div id="health">
   <div class="loading">Loading health items...</div>
@@ -144,6 +161,7 @@
 <script>
 const PROJECTS_URL = "projects.md";
 const STATE_URL = "current-state.md";
+const USAGE_URL = "usage.json";
 
 let allRows = [];
 let activeFilter = "all";
@@ -240,7 +258,44 @@ function parseHealthItems(md) {
   return items;
 }
 
+function fmtNum(n) {
+  return n.toLocaleString("en-US");
+}
+
+function fmtCost(n) {
+  return "$" + n.toFixed(2);
+}
+
+function shortModel(m) {
+  if (!m || m === "—") return "—";
+  return m.replace(/^claude-/, "").replace(/-\d{8}$/, "");
+}
+
+async function renderUsage() {
+  try {
+    const resp = await fetch(USAGE_URL + "?t=" + Date.now());
+    if (!resp.ok) throw new Error("no usage.json");
+    const data = await resp.json();
+    const tbody = document.getElementById("usage-body");
+    tbody.innerHTML = data.periods.map(p => `
+      <tr>
+        <td>${p.label}</td>
+        <td class="readiness">${fmtNum(p.tokens)}</td>
+        <td class="readiness">${fmtCost(p.cost)}</td>
+        <td class="readiness">${p.activeDays}</td>
+        <td class="notes hide-mobile">${shortModel(p.topModel)}</td>
+      </tr>
+    `).join("");
+    const ts = new Date(data.generatedAt).toLocaleString();
+    document.getElementById("usage-meta").textContent = `Generated ${ts} · run \`node gen-usage.mjs\` to refresh`;
+  } catch (err) {
+    document.getElementById("usage-body").innerHTML =
+      `<tr><td colspan="5" class="loading">Usage data unavailable.</td></tr>`;
+  }
+}
+
 async function init() {
+  renderUsage();
   try {
     const [projectsMd, stateMd] = await Promise.all([
       fetchText(PROJECTS_URL),
