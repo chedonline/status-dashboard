@@ -1,31 +1,31 @@
 {
-  "generatedAt": "2026-04-18T19:54:22.452Z",
+  "generatedAt": "2026-04-18T20:44:54.949Z",
   "periods": [
     {
       "label": "Today",
-      "tokens": 29295246,
-      "cost": 21.898125749999988,
+      "tokens": 32036384,
+      "cost": 23.91930149999999,
       "topModel": "claude-opus-4-7",
       "activeDays": 1
     },
     {
       "label": "Last 7 days",
-      "tokens": 76662774,
-      "cost": 58.57892044999997,
+      "tokens": 79403912,
+      "cost": 60.600096199999975,
       "topModel": "claude-opus-4-6",
       "activeDays": 5
     },
     {
       "label": "Last 30 days",
-      "tokens": 208680092,
-      "cost": 155.90559844999999,
+      "tokens": 211421230,
+      "cost": 157.92677419999998,
       "topModel": "claude-opus-4-6",
       "activeDays": 16
     },
     {
       "label": "All time",
-      "tokens": 216861547,
-      "cost": 160.17627859999996,
+      "tokens": 219602685,
+      "cost": 162.19745434999996,
       "topModel": "claude-opus-4-6",
       "activeDays": 21
     }

@@ -117,26 +117,23 @@
   <a href="https://github.com/chedonline/projects">projects/</a>
 </div>
 
-<div class="section-label">Projects</div>
-<div class="filters" id="filters"></div>
+<div class="section-label">To-dos</div>
 <table>
   <thead>
     <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Readiness</th>
-      <th>Status</th>
-      <th class="hide-mobile">Pending</th>
+      <th>Project</th>
+      <th>Next Step</th>
+      <th>Completion</th>
       <th class="hide-mobile">Notes</th>
     </tr>
   </thead>
-  <tbody id="projects-body">
-    <tr><td colspan="6" class="loading">Loading projects...</td></tr>
+  <tbody id="todos-body">
+    <tr><td colspan="4" class="loading">Loading todos...</td></tr>
   </tbody>
 </table>
-<div class="summary" id="summary"></div>
+<div class="summary" id="todos-summary"></div>
 
-<div class="section-label">Usage</div>
+<div class="section-label" style="margin-top: 3rem;">Usage</div>
 <table id="usage-table">
   <thead>
     <tr>
@@ -153,18 +150,10 @@
 </table>
 <div class="summary" id="usage-meta"></div>
 
-<div class="section-label">Health</div>
-<div id="health">
-  <div class="loading">Loading health items...</div>
-</div>
 
 <script>
-const PROJECTS_URL = "projects.md";
-const STATE_URL = "current-state.md";
+const TODOS_URL = "todos.md";
 const USAGE_URL = "usage.json";
-
-let allRows = [];
-let activeFilter = "all";
 
 async function fetchText(url) {
   const resp = await fetch(url + "?t=" + Date.now());
@@ -174,19 +163,14 @@ async function fetchText(url) {
 
 function parseMarkdownTable(md) {
   const lines = md.split("\n").filter(l => l.trim().startsWith("|"));
-  if (lines.length < 3) return []; // header + separator + at least one row
+  if (lines.length < 3) return [];
   return lines.slice(2).map(line => {
     const cells = line.split("|").slice(1, -1).map(c => c.trim());
     return cells;
   });
 }
 
-function extractLink(cell) {
-  const match = cell.match(/\[([^\]]+)\]\(([^)]+)\)/);
-  return match ? { text: match[1], url: match[2] } : { text: cell, url: null };
-}
-
-function readinessClass(val) {
+function completionClass(val) {
   const n = parseInt(val);
   if (isNaN(n)) return "r-low";
   if (n >= 75) return "r-high";
@@ -194,68 +178,17 @@ function readinessClass(val) {
   return "r-low";
 }
 
-function typeClass(type) {
-  return "type-" + type.toLowerCase().replace(/[^a-z]/g, "");
-}
-
-function renderProjects(filter) {
-  const tbody = document.getElementById("projects-body");
-  const rows = filter === "all" ? allRows : allRows.filter(r => r.type.toLowerCase() === filter);
-
-  tbody.innerHTML = rows.map(r => {
-    const parked = r.status.includes("Parked") ? " parked" : "";
-    return `<tr class="${parked}">
-      <td>${r.link.url ? `<a href="${r.link.url}">${r.link.text}</a>` : r.link.text}</td>
-      <td><span class="type-badge ${typeClass(r.type)}">${r.type}</span></td>
-      <td><span class="readiness ${readinessClass(r.readiness)}">${r.readiness}</span></td>
-      <td>${r.status}</td>
-      <td class="pending hide-mobile">${r.pending}</td>
-      <td class="notes hide-mobile">${r.notes}</td>
-    </tr>`;
-  }).join("");
-
-  // Summary
-  const types = {};
-  allRows.forEach(r => {
-    const t = r.type.toLowerCase();
-    types[t] = (types[t] || 0) + 1;
-  });
-  document.getElementById("summary").textContent =
-    Object.entries(types).map(([t, n]) => `${n} ${t}${n > 1 ? "s" : ""}`).join(" · ");
-}
-
-function renderFilters() {
-  const types = [...new Set(allRows.map(r => r.type.toLowerCase()))];
-  const container = document.getElementById("filters");
-  const all = [`<button class="active" onclick="setFilter('all')">All</button>`];
-  types.forEach(t => {
-    all.push(`<button onclick="setFilter('${t}')">${t}</button>`);
-  });
-  container.innerHTML = all.join("");
-}
-
-function setFilter(f) {
-  activeFilter = f;
-  document.querySelectorAll(".filters button").forEach(b => {
-    b.classList.toggle("active", b.textContent.toLowerCase() === f);
-  });
-  renderProjects(f);
-}
-window.setFilter = setFilter;
-
-function parseHealthItems(md) {
-  const items = [];
-  const lines = md.split("\n");
-  for (const line of lines) {
-    const match = line.match(/^- \[ \] \*\*(.+?)\*\*\s*[—–-]\s*(.+)/);
-    if (match) {
-      items.push(`<strong>${match[1]}</strong> — ${match[2]}`);
-    } else {
-      const simple = line.match(/^- \[ \] (.+)/);
-      if (simple) items.push(simple[1]);
-    }
-  }
-  return items;
+function renderTodos(rows) {
+  const tbody = document.getElementById("todos-body");
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.project || "—"}</td>
+      <td>${r.nextStep || ""}</td>
+      <td><span class="readiness ${completionClass(r.completion)}">${r.completion || "—"}</span></td>
+      <td class="notes hide-mobile">${r.notes || ""}</td>
+    </tr>
+  `).join("");
+  document.getElementById("todos-summary").textContent = `${rows.length} open todos`;
 }
 
 function fmtNum(n) {
@@ -297,34 +230,22 @@ async function renderUsage() {
 async function init() {
   renderUsage();
   try {
-    const [projectsMd, stateMd] = await Promise.all([
-      fetchText(PROJECTS_URL),
-      fetchText(STATE_URL),
-    ]);
-
-    // Parse projects
-    const rows = parseMarkdownTable(projectsMd);
-    allRows = rows.map(cells => ({
-      link: extractLink(cells[0] || ""),
-      type: cells[1] || "",
-      readiness: cells[2] || "—",
-      status: cells[3] || "",
-      pending: cells[4] || "",
-      notes: cells[5] || "",
+    const todosMd = await fetchText(TODOS_URL);
+    const rows = parseMarkdownTable(todosMd).map(cells => ({
+      project: cells[0] || "",
+      nextStep: cells[1] || "",
+      completion: cells[2] || "—",
+      notes: cells[3] || "",
     }));
-
-    renderFilters();
-    renderProjects("all");
-
-    // Parse health
-    const healthItems = parseHealthItems(stateMd);
-    document.getElementById("health").innerHTML = healthItems.length
-      ? healthItems.map(h => `<div class="health-item">${h}</div>`).join("")
-      : '<div class="loading">No open health items.</div>';
-
+    // Sort by completion ascending (lowest first)
+    rows.sort((a, b) => {
+      const na = parseInt(a.completion); const nb = parseInt(b.completion);
+      return (isNaN(na) ? 999 : na) - (isNaN(nb) ? 999 : nb);
+    });
+    renderTodos(rows);
   } catch (err) {
-    document.getElementById("projects-body").innerHTML =
-      `<tr><td colspan="6" class="loading">Error: ${err.message}</td></tr>`;
+    document.getElementById("todos-body").innerHTML =
+      `<tr><td colspan="4" class="loading">Error: ${err.message}</td></tr>`;
   }
 }
 
