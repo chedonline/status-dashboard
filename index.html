@@ -133,7 +133,7 @@
 </table>
 <div class="summary" id="todos-summary"></div>
 
-<div class="section-label" style="margin-top: 3rem;">Usage</div>
+<div class="section-label" style="margin-top: 3rem;">Usage — Totals</div>
 <table id="usage-table">
   <thead>
     <tr>
@@ -141,11 +141,25 @@
       <th>Tokens</th>
       <th>Cost (USD)</th>
       <th>Active days</th>
-      <th class="hide-mobile">Top model</th>
     </tr>
   </thead>
   <tbody id="usage-body">
-    <tr><td colspan="5" class="loading">Loading usage...</td></tr>
+    <tr><td colspan="4" class="loading">Loading usage...</td></tr>
+  </tbody>
+</table>
+
+<div class="section-label" style="margin-top: 1.5rem;">Usage — Model mix (Last 30 days)</div>
+<table id="model-table">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Cost (USD)</th>
+      <th>Share</th>
+      <th class="hide-mobile">Tokens</th>
+    </tr>
+  </thead>
+  <tbody id="model-body">
+    <tr><td colspan="4" class="loading">Loading model mix...</td></tr>
   </tbody>
 </table>
 <div class="summary" id="usage-meta"></div>
@@ -209,6 +223,8 @@ async function renderUsage() {
     const resp = await fetch(USAGE_URL + "?t=" + Date.now());
     if (!resp.ok) throw new Error("no usage.json");
     const data = await resp.json();
+
+    // Totals table
     const tbody = document.getElementById("usage-body");
     tbody.innerHTML = data.periods.map(p => `
       <tr>
@@ -216,14 +232,32 @@ async function renderUsage() {
         <td class="readiness">${fmtNum(p.tokens)}</td>
         <td class="readiness">${fmtCost(p.cost)}</td>
         <td class="readiness">${p.activeDays}</td>
-        <td class="notes hide-mobile">${shortModel(p.topModel)}</td>
       </tr>
     `).join("");
+
+    // Model mix — use Last 30 days period
+    const mbody = document.getElementById("model-body");
+    const thirty = data.periods.find(p => p.label === "Last 30 days");
+    if (thirty && thirty.models && thirty.models.length) {
+      mbody.innerHTML = thirty.models.map(m => `
+        <tr>
+          <td>${shortModel(m.name)}</td>
+          <td class="readiness">${fmtCost(m.cost)}</td>
+          <td class="readiness">${m.pct.toFixed(1)}%</td>
+          <td class="readiness hide-mobile">${fmtNum(m.tokens)}</td>
+        </tr>
+      `).join("");
+    } else {
+      mbody.innerHTML = `<tr><td colspan="4" class="loading">No model data.</td></tr>`;
+    }
+
     const ts = new Date(data.generatedAt).toLocaleString();
     document.getElementById("usage-meta").textContent = `Generated ${ts} · run \`node gen-usage.mjs\` to refresh`;
   } catch (err) {
     document.getElementById("usage-body").innerHTML =
-      `<tr><td colspan="5" class="loading">Usage data unavailable.</td></tr>`;
+      `<tr><td colspan="4" class="loading">Usage data unavailable.</td></tr>`;
+    document.getElementById("model-body").innerHTML =
+      `<tr><td colspan="4" class="loading">Usage data unavailable.</td></tr>`;
   }
 }
 

@@ -1,32 +1,114 @@
 {
-  "generatedAt": "2026-04-18T20:44:54.949Z",
+  "generatedAt": "2026-04-18T21:50:58.028Z",
   "periods": [
     {
       "label": "Today",
-      "tokens": 32036384,
-      "cost": 23.91930149999999,
-      "topModel": "claude-opus-4-7",
+      "tokens": 48548056,
+      "cost": 35.94704849999998,
+      "models": [
+        {
+          "name": "claude-opus-4-7",
+          "cost": 35.94704849999998,
+          "tokens": 48548056,
+          "pct": 100
+        }
+      ],
       "activeDays": 1
     },
     {
       "label": "Last 7 days",
-      "tokens": 79403912,
-      "cost": 60.600096199999975,
-      "topModel": "claude-opus-4-6",
+      "tokens": 95915584,
+      "cost": 72.62784319999997,
+      "models": [
+        {
+          "name": "claude-opus-4-7",
+          "cost": 40.62909474999998,
+          "tokens": 50767181,
+          "pct": 55.94148601951048
+        },
+        {
+          "name": "claude-opus-4-6",
+          "cost": 31.63493574999999,
+          "tokens": 43993448,
+          "pct": 43.55758667221444
+        },
+        {
+          "name": "claude-haiku-4-5-20251001",
+          "cost": 0.3638127,
+          "tokens": 1154955,
+          "pct": 0.5009273082750723
+        }
+      ],
       "activeDays": 5
     },
     {
       "label": "Last 30 days",
-      "tokens": 211421230,
-      "cost": 157.92677419999998,
-      "topModel": "claude-opus-4-6",
+      "tokens": 227932902,
+      "cost": 169.9545212,
+      "models": [
+        {
+          "name": "claude-opus-4-6",
+          "cost": 118.97773324999999,
+          "tokens": 154153539,
+          "pct": 70.00562998261678
+        },
+        {
+          "name": "claude-opus-4-7",
+          "cost": 40.62909474999998,
+          "tokens": 50767181,
+          "pct": 23.905862852679427
+        },
+        {
+          "name": "claude-sonnet-4-6",
+          "cost": 9.043236300000004,
+          "tokens": 19014056,
+          "pct": 5.320974244255647
+        },
+        {
+          "name": "claude-haiku-4-5-20251001",
+          "cost": 1.3044569000000001,
+          "tokens": 3998126,
+          "pct": 0.7675329204481324
+        }
+      ],
       "activeDays": 16
     },
     {
       "label": "All time",
-      "tokens": 219602685,
-      "cost": 162.19745434999996,
-      "topModel": "claude-opus-4-6",
+      "tokens": 236114357,
+      "cost": 174.22520134999996,
+      "models": [
+        {
+          "name": "claude-opus-4-6",
+          "cost": 118.97773324999999,
+          "tokens": 154153539,
+          "pct": 68.28962304424968
+        },
+        {
+          "name": "claude-opus-4-7",
+          "cost": 40.62909474999998,
+          "tokens": 50767181,
+          "pct": 23.319872461148965
+        },
+        {
+          "name": "claude-sonnet-4-6",
+          "cost": 13.191410850000004,
+          "tokens": 26937697,
+          "pct": 7.571471146415758
+        },
+        {
+          "name": "claude-haiku-4-5-20251001",
+          "cost": 1.4124985,
+          "tokens": 4236083,
+          "pct": 0.810731449328298
+        },
+        {
+          "name": "claude-opus-4-5-20251101",
+          "cost": 0.014464000000000001,
+          "tokens": 19857,
+          "pct": 0.00830189885729755
+        }
+      ],
       "activeDays": 21
     }
   ]

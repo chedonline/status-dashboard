@@ -20,14 +20,23 @@ function sumRange(sinceISO) {
   const rows = days.filter((d) => d.date >= sinceISO);
   const tokens = rows.reduce((s, d) => s + (d.totalTokens || 0), 0);
   const cost = rows.reduce((s, d) => s + (d.totalCost || 0), 0);
-  const modelCost = {};
+  const modelAgg = {};
   rows.forEach((d) => {
     (d.modelBreakdowns || []).forEach((m) => {
-      modelCost[m.modelName] = (modelCost[m.modelName] || 0) + (m.cost || 0);
+      if (!modelAgg[m.modelName]) modelAgg[m.modelName] = { cost: 0, tokens: 0 };
+      modelAgg[m.modelName].cost += m.cost || 0;
+      modelAgg[m.modelName].tokens += (m.inputTokens || 0) + (m.outputTokens || 0) + (m.cacheCreationTokens || 0) + (m.cacheReadTokens || 0);
     });
   });
-  const top = Object.entries(modelCost).sort((a, b) => b[1] - a[1])[0];
-  return { tokens, cost, topModel: top ? top[0] : "—", activeDays: rows.filter((d) => d.totalTokens > 0).length };
+  const models = Object.entries(modelAgg)
+    .map(([name, v]) => ({
+      name,
+      cost: v.cost,
+      tokens: v.tokens,
+      pct: cost > 0 ? (v.cost / cost) * 100 : 0,
+    }))
+    .sort((a, b) => b.cost - a.cost);
+  return { tokens, cost, models, activeDays: rows.filter((d) => d.totalTokens > 0).length };
 }
 
 const summary = {
