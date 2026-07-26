@@ -21,6 +21,8 @@ Sorted by completion (lowest first) within each group. Use `/progress` to bump c
 | designordeath.com | Concept + build first showcase site | 0% | Strongest domain |
 | mme-claude | Define sub-agent roles | 10% | General ops agent |
 | sophie (job-hunter) | Confirm filter logic, review after resume-slide extraction | 40% | — |
+| ps-enablement | Follow up on Slack bot approval (Jira IT ticket) | 50% | Original submitted via Slack web interface; now filing Jira to route through IT for workspace admin approval |
+| papercraft | Cleaned templates in Figma — Charles review | 90% | 2026-07-26: cleaned 2 third-party paper-toy PDFs into editable Figma on new page "Papercraft — Cleaned Templates" (355-2) in the CP Workspace file. AF1 "Hairforce1" shoe (2 Letter frames) = cv2-traced editable vector line art + 17 editable text labels (grouped, toggleable); br. bear (A4) = Textures(raster, toggle) / Cut lines / Fold lines layers. Assets in skills/papercraft/cleaned/. Follow-ups offered: potrace smooth béziers, restyle label font, make AF1 "- AIR -" editable |
 | status | Split into sub-skills (drift.md, activity.md, letsgo.md, usage.md) | 0% | Getting too big — refactor when next feature requires editing 3+ sections |
 | ai-news | Add more sources, fix article count threshold | 90% | Only 9-10 items passing |
 | status-dashboard | Add auto-refresh timer | 90% | — |
